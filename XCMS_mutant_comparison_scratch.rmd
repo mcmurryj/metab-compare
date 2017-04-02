@@ -5,12 +5,11 @@ setwd("Z:/Jon/metabolomics/20160825/compare")
 #REPLACE all XXXXX with your mutant name.
 #put wt sample mzml files in a folder named "wt".  mutants in a folder named "XXXXX"
 #paste the following in an R terminal, or source the file using the source() command.  It should work.
-#Pipeline is largely based on the SI from  "Six enzymes from mayapple that complete the biosynthetic pathway to the etoposide aglycone."
-#2015 Sep 11;349(6253):1224-8. doi: 10.1126/science.aac7202.
-#With additional heuristics applied to try and cut down on the # of crap peaks.
 #TO make it more/less stringent, change the following parms:
 #ppm, peakwidth, snthresh, noise, XXXXXreport$fold > X, XXXXXgood$pvalue < X
 
+#Load the package
+library(xcms)
 ###noise is just a signal cutoff, it dramatically decreases the # of peaks.  I think somewhere between 1000-2000 is apropos.
 XXXXX<-xcmsSet("wt_vs_XXXXX", method="centWave",ppm=10, peakwidth=c(10,30), snthresh = 10, noise = 1500)
 #Associate peaks across samples based on m/z and retention time.
