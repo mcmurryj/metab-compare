@@ -1,50 +1,50 @@
 ```{r}
-###Jon McMurry 20170331
+### Jon McMurry 20170331
 
 setwd("D:/jmcmurry/Documents/metabalomics/20160825_compare/")
 
-#REPLACE all flA with your mutant name.
-#put wt sample mzml files in a folder named "wt".  mutants in a folder named "flA"
-#paste the following in an R terminal, or source the file using the source() command.  It should work.
-#TO make it more/less stringent, change the following parms:
-#ppm, peakwidth, snthresh, noise, flAreport$fold > X, flAgood$pvalue < X
+### REPLACE all flA with your mutant name.
+### put wt sample mzml files in a folder named "wt".  mutants in a folder named "flA"
+### paste the following in an R terminal, or source the file using the source() command.  It should work.
+### TO make it more/less stringent, change the following parms:
+### ppm, peakwidth, snthresh, noise, flAreport$fold > X, flAgood$pvalue < X
 
-#Load the package
+### Load the package
 library(xcms)
-###noise is just a signal cutoff, it dramatically decreases the # of peaks.  I think somewhere between 1000-2000 is apropos.
+### noise is just a signal cutoff, it dramatically decreases the # of peaks.  I think somewhere between 1000-2000 is apropos.
 flA<-xcmsSet("wt_vs_flA", method="centWave",ppm=10, peakwidth=c(10,30), snthresh = 10, noise = 1500)
-#Associate peaks across samples based on m/z and retention time.
+### Associate peaks across samples based on m/z and retention time.
 flA2<-group(flA)
-#Apply retention time correction
+### Apply retention time correction
 flA3<-retcor(flA2,family="s",plottype="m")
 flA3<-group(flA3)
-###I wonder why they do retcor twice?
+### I wonder why they do retcor twice?
 flA4<-retcor(flA3,family="s",plottype="m")
-###bw does some sort of chromatogram smoothing
+### bw does some sort of chromatogram smoothing
 flA4<-group(flA4,bw=10)
-#Fill regions with no signal
+### Fill regions with no signal
 flA5<-fillPeaks(flA4)
 #Perform differential analysis
 flAreport <-  diffreport (flA5)
 
-#Apply various cutoff stuff.  We want
+### Apply various cutoff stuff.  We want
 flAgood = flAreport[flAreport$fold >10, ]
 flAgood = flAgood[flAgood$pvalue <0.01,]
 wt_ave = rowMeans(flAgood[,19:23])
 flA_ave = rowMeans(flAgood[,14:18])
 flAgood = cbind(flAgood, wt_ave,flA_ave)
 
-###Pull EICs.  Unfortunately I think the default is a 0.01 Da XIC window and it is inconvenient to change.
+### Pull EICs.  Unfortunately I think the default is a 0.01 Da XIC window and it is inconvenient to change.
 credible.eic.raw = getEIC(flA5, rt = "raw", groupidx=as.character(flAgood$name))
 
-###plot EIC of the first "credible ID", will only plot one at a time
+### plot EIC of the first "credible ID", will only plot one at a time
 plot(credible.eic.raw, flA5,groupidx=as.character(flAgood$name)[1])
 
 
-###loop plot, keypress to advance per pic; could change plot command to save EICs to a file
-#for (i in 1:length(flAgood$name)){
-#    plot(credible.eic.raw, flA5, groupidx=as.character(flAgood$name)[i])
-#    cat ("Press [enter] to continue")
-#    line <- readline()
-#}
+### loop plot, keypress to advance per pic; could change plot command to save EICs to a file
+for (i in 1:length(flAgood$name)){
+    plot(credible.eic.raw, flA5, groupidx=as.character(flAgood$name)[i])
+    cat ("Press [enter] to continue")
+    line <- readline()
+}
 ```
